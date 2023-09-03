@@ -1,71 +1,62 @@
-import { useCallback, useEffect, useState } from 'react'
-import Button from '../components/Button'
-import ClickCount from '../components/ClickCount'
-import styles from '../styles/home.module.css'
+/*
+Create a text area with the following specifications:
+1. a H1 with the text "Find Nutriotion Facts for any recipe"
+2. a text area for users to upload recipe
+3. a button for users to submit the entered recipe
+4. a section at the bottom to display nutrition facts
+5. Get the data from this link: http://localhost:8080/openai/generateinfo
+6. Name the component RecipeInfo
+*/
+import React from "react";
+import axios from "axios";
 
-function throwError() {
-  console.log(
-    // The function body() is not defined
-    document.body()
-  )
-}
+const RecipeInfo = () => {
+  const [recipe, setRecipe] = React.useState("");
+  const [nutrition, setNutrition] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
 
-function Home() {
-  const [count, setCount] = useState(0)
-  const increment = useCallback(() => {
-    setCount((v) => v + 1)
-  }, [setCount])
-
-  useEffect(() => {
-    const r = setInterval(() => {
-      increment()
-    }, 1000)
-
-    return () => {
-      clearInterval(r)
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const response = await axios.post("http://localhost:8080/openai/generateinfo", {
+        recipe,
+      });
+      setNutrition(response.data.data);
+      setIsLoading(false);
+    } catch (error) {
+      setError(error);
+      setIsLoading(false);
     }
-  }, [increment])
+  };
 
   return (
-    <main className={styles.main}>
-      <h1>Fast Refresh Demo</h1>
-      <p>
-        Fast Refresh is a Next.js feature that gives you instantaneous feedback
-        on edits made to your React components, without ever losing component
-        state.
-      </p>
-      <hr className={styles.hr} />
-      <div>
-        <p>
-          Auto incrementing value. The counter won't reset after edits or if
-          there are errors.
-        </p>
-        <p>Current value: {count}</p>
+    <div className="container">
+      <h1 className="title">Find Nutrition Facts for any recipe</h1>
+      <form onSubmit={handleSubmit}>
+        <textarea
+          className="textarea"
+          value={recipe}
+          onChange={(e) => setRecipe(e.target.value)}
+          placeholder="Enter a recipe"
+        />
+        <button className="button is-primary" type="submit">
+          Submit
+        </button>
+      </form>
+      <div className="section">
+        {isLoading ? (
+          <progress className="progress is-small is-primary" max="100">
+            15%
+          </progress>
+        ) : (
+          <p className="content">{nutrition}</p>
+        )}
+        {error && <p className="has-text-danger">{error}</p>}
       </div>
-      <hr className={styles.hr} />
-      <div>
-        <p>Component with state.</p>
-        <ClickCount />
-      </div>
-      <hr className={styles.hr} />
-      <div>
-        <p>
-          The button below will throw 2 errors. You'll see the error overlay to
-          let you know about the errors but it won't break the page or reset
-          your state.
-        </p>
-        <Button
-          onClick={(e) => {
-            setTimeout(() => document.parentNode(), 0)
-            throwError()
-          }}
-        >
-          Throw an Error
-        </Button>
-      </div>
-      <hr className={styles.hr} />
-    </main>
-  )
-}
+    </div>
+  );
+};
 
-export default Home
+export default RecipeInfo;

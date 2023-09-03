@@ -14,7 +14,12 @@
       "openFiles": [
         "pages/index.js"
       ]
-    }
+	},
+	"vscode": {
+		"extensions": [
+			"GitHub.copilot-chat"
+		]
+	}
   },
   "portsAttributes": {
     "3000": {
